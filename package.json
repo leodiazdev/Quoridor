@@ -1,0 +1,17 @@
+{
+  "name": "quoridor-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@12.6.0",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck",
+    "dev:server": "pnpm --filter @quoridor/server run start:dev",
+    "dev:web": "pnpm --filter @quoridor/web run dev",
+    "dev": "pnpm --filter @quoridor/server run start:dev & pnpm --filter @quoridor/web run dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
