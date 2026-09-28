@@ -1,4 +1,4 @@
-import { Application, Container, Rectangle } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
 import { GameState, Position, WallOrientation, ValidationResult, PlayerId } from '@quoridor/core';
 import { BOARD_TOTAL_SIZE, RENDER_CONFIG } from './constants.js';
 import { BoardRenderer } from './board.renderer.js';
@@ -14,6 +14,7 @@ export class QuoridorView {
   public wallRenderer!: WallRenderer;
 
   private currentLegalMoves: Position[] = [];
+  private activeMode: 'MOVE' | 'WALL' | 'AUTO' = 'AUTO';
 
   public onMoveSelected?: (pos: Position) => void;
   public onWallPlaced?: (anchor: Position, orientation: WallOrientation) => void;
@@ -39,7 +40,7 @@ export class QuoridorView {
 
     this.app.stage.addChild(this.stageContainer);
 
-    // Initialize layers
+    // Initialize renderer layers
     this.boardRenderer = new BoardRenderer();
     this.wallRenderer = new WallRenderer();
     this.pawnRenderer = new PawnRenderer();
@@ -52,16 +53,20 @@ export class QuoridorView {
     this.wallRenderer.wallValidator = (anchor, orientation) =>
       this.wallValidator ? this.wallValidator(anchor, orientation) : { valid: true };
 
-    // Make stage globally interactive
-    this.app.stage.eventMode = 'static';
-    this.app.stage.hitArea = new Rectangle(0, 0, BOARD_TOTAL_SIZE, BOARD_TOTAL_SIZE);
+    // Native DOM listeners directly on canvas guarantee 100% reliable tracking
+    canvas.addEventListener('pointermove', (e: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = BOARD_TOTAL_SIZE / rect.width;
+      const scaleY = BOARD_TOTAL_SIZE / rect.height;
+      const localX = (e.clientX - rect.left) * scaleX;
+      const localY = (e.clientY - rect.top) * scaleY;
 
-    this.app.stage.on('pointermove', (event) => {
-      const local = event.getLocalPosition(this.stageContainer);
-      const isGrooveSnapped = this.wallRenderer.handlePointerMove(local.x, local.y);
-      const isOverLegalMove = !!this.findLegalMoveAt(local.x, local.y);
+      const isGrooveSnapped = this.wallRenderer.handlePointerMove(localX, localY);
+      const isOverLegalMove = !!this.findLegalMoveAt(localX, localY);
 
-      if (isOverLegalMove) {
+      if (this.activeMode === 'WALL') {
+        canvas.style.cursor = isGrooveSnapped && this.wallRenderer.isGhostValid() ? 'pointer' : (isGrooveSnapped ? 'not-allowed' : 'crosshair');
+      } else if (isOverLegalMove) {
         canvas.style.cursor = 'pointer';
       } else if (isGrooveSnapped && this.wallRenderer.isGhostValid()) {
         canvas.style.cursor = 'pointer';
@@ -72,24 +77,36 @@ export class QuoridorView {
       }
     });
 
-    this.app.stage.on('pointerdown', (event) => {
-      const local = event.getLocalPosition(this.stageContainer);
+    canvas.addEventListener('pointerdown', (e: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = BOARD_TOTAL_SIZE / rect.width;
+      const scaleY = BOARD_TOTAL_SIZE / rect.height;
+      const localX = (e.clientX - rect.left) * scaleX;
+      const localY = (e.clientY - rect.top) * scaleY;
 
-      // 1. Check if user clicked a legal move destination
-      const move = this.findLegalMoveAt(local.x, local.y);
+      if (this.activeMode === 'WALL') {
+        const anchor = this.wallRenderer.getHoveredAnchor();
+        if (anchor && this.wallRenderer.isGhostValid()) {
+          this.onWallPlaced?.({ ...anchor }, this.wallRenderer.getOrientation());
+          return;
+        }
+      }
+
+      // Check move disc click
+      const move = this.findLegalMoveAt(localX, localY);
       if (move) {
         this.onMoveSelected?.(move);
         return;
       }
 
-      // 2. Check if user clicked a legal groove intersection to place wall
+      // Check groove click
       const anchor = this.wallRenderer.getHoveredAnchor();
       if (anchor && this.wallRenderer.isGhostValid()) {
         this.onWallPlaced?.({ ...anchor }, this.wallRenderer.getOrientation());
       }
     });
 
-    this.app.stage.on('pointerleave', () => {
+    canvas.addEventListener('pointerleave', () => {
       this.wallRenderer.clearGhost();
       canvas.style.cursor = 'default';
     });
@@ -98,6 +115,10 @@ export class QuoridorView {
     this.app.ticker.add((ticker) => {
       this.pawnRenderer.update(ticker.deltaTime);
     });
+  }
+
+  public setInteractionMode(mode: 'MOVE' | 'WALL') {
+    this.activeMode = mode;
   }
 
   private findLegalMoveAt(x: number, y: number): Position | null {
