@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quoridor | Authoritative Real-Time Strategy</title>
+    <meta name="description" content="Quoridor real-time 1v1 multiplayer web adaptation with procedural PixiJS rendering and authoritative NestJS engine." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#0b1120] text-slate-100 font-['Outfit'] min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-black overflow-x-hidden">
+    <!-- Top Bar Navigation / Room Status -->
+    <header class="w-full border-b border-slate-800 bg-slate-900/60 backdrop-blur-md px-6 py-3 flex items-center justify-between sticky top-0 z-40">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-slate-950 text-base shadow-lg shadow-cyan-500/20">
+          Q
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            QUORIDOR
+            <span class="text-[10px] font-mono uppercase bg-slate-800 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-500/30">Authoritative</span>
+          </h1>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <div id="connectionStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="connectionText">Online (Local)</span>
+        </div>
+
+        <div id="roomBadge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300">
+          <span class="text-slate-400">ROOM:</span>
+          <span id="roomCodeText" class="font-bold text-cyan-400">LOCAL</span>
+          <button id="copyRoomBtn" title="Copy room link" class="hover:text-white transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="flex-1 flex flex-col lg:flex-row items-center justify-center p-4 lg:p-8 gap-8 max-w-7xl mx-auto w-full">
+      <!-- PixiJS Canvas Container -->
+      <section class="flex flex-col items-center justify-center relative">
+        <div id="canvasContainer" class="rounded-2xl p-2 bg-slate-900/80 border border-slate-800/80 shadow-2xl shadow-cyan-950/20 backdrop-blur relative overflow-hidden flex items-center justify-center">
+          <!-- Canvas injected here -->
+        </div>
+
+        <!-- Controls Guide Footer -->
+        <div class="flex items-center justify-center gap-6 mt-4 text-xs font-mono text-slate-400">
+          <div class="flex items-center gap-1.5">
+            <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">Space</kbd>
+            <span>/</span>
+            <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">R</kbd>
+            <span>Rotate Wall</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span>Click Disc to Move</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span>Click Groove to Place Wall</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sidebar HUD & Match Panel -->
+      <aside class="w-full lg:w-80 flex flex-col gap-4">
+        <!-- Turn Indicator Header -->
+        <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-5 backdrop-blur flex flex-col gap-4 shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Match Status</span>
+            <div id="turnBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+              PLAYER 1 TURN
+            </div>
+          </div>
+
+          <!-- Scoreboard: Player 1 vs Player 2 -->
+          <div class="flex flex-col gap-3">
+            <!-- Player 1 Card -->
+            <div id="p1Card" class="p-3.5 rounded-lg border-2 border-cyan-500/60 bg-cyan-950/20 transition-all flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50 flex items-center justify-center font-bold text-slate-950 text-xs">
+                  1
+                </div>
+                <div>
+                  <div class="font-bold text-sm text-cyan-300 flex items-center gap-1.5">
+                    Player 1
+                    <span id="p1RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-900/50 text-cyan-300">You</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400">Target: Row 8 (Bottom)</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs font-bold text-amber-400 flex items-center justify-end gap-1">
+                  <span id="p1WallsText" class="text-base font-extrabold">10</span>
+                  <span class="text-[10px] text-slate-400 uppercase">walls</span>
+                </div>
+                <div id="p1DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 steps</div>
+              </div>
+            </div>
+
+            <!-- Player 2 Card -->
+            <div id="p2Card" class="p-3.5 rounded-lg border border-slate-800 bg-slate-800/20 transition-all flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50 flex items-center justify-center font-bold text-white text-xs">
+                  2
+                </div>
+                <div>
+                  <div class="font-bold text-sm text-rose-300 flex items-center gap-1.5">
+                    Player 2
+                    <span id="p2RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-rose-950/50 text-rose-300 hidden">Opponent</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400">Target: Row 0 (Top)</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs font-bold text-amber-400 flex items-center justify-end gap-1">
+                  <span id="p2WallsText" class="text-base font-extrabold">10</span>
+                  <span class="text-[10px] text-slate-400 uppercase">walls</span>
+                </div>
+                <div id="p2DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 steps</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action / Wall Mode Bar -->
+        <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-4 backdrop-blur flex flex-col gap-3">
+          <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+            <span>Wall Deployment</span>
+            <span id="orientationBadge" class="text-xs font-mono text-amber-400 font-bold">HORIZONTAL</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button id="rotateWallBtn" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition">
+              <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              Rotate Wall
+            </button>
+            <button id="resetGameBtn" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition">
+              <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              Restart
+            </button>
+          </div>
+        </div>
+
+        <!-- Matchmaking / Room Connection Panel -->
+        <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-4 backdrop-blur flex flex-col gap-3">
+          <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Multiplayer Connection</span>
+          <div class="flex gap-2">
+            <input id="roomInput" type="text" placeholder="Enter Room Code" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 uppercase" />
+            <button id="joinRoomBtn" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-lg text-xs transition shadow-md shadow-cyan-500/20">
+              Join / Create
+            </button>
+          </div>
+          <button id="playOfflineBtn" class="text-[11px] text-slate-400 hover:text-cyan-400 underline underline-offset-4 text-center transition">
+            Switch to Pass & Play (Offline)
+          </button>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-sm w-full flex flex-col items-center text-center shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div id="winnerIcon" class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mb-4 shadow-xl">
+          🏆
+        </div>
+        <h2 id="winnerTitle" class="text-2xl font-extrabold text-white mb-2 tracking-tight">PLAYER 1 VICTORIOUS!</h2>
+        <p id="winnerSubtitle" class="text-xs text-slate-400 mb-6">Successfully reached the opposing baseline through masterful spatial strategy.</p>
+        
+        <div class="w-full flex flex-col gap-2">
+          <button id="modalPlayAgainBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-cyan-500/25">
+            Play Again
+          </button>
+          <button id="modalCloseBtn" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition">
+            Review Board
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Toast Notification -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 bg-rose-950/90 border border-rose-500/50 text-rose-200 text-xs px-4 py-2.5 rounded-lg shadow-xl backdrop-blur transition-all duration-300 opacity-0 pointer-events-none translate-y-2 z-50 flex items-center gap-2">
+      <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      <span id="toastMessage">Illegal Action</span>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
