@@ -2,6 +2,8 @@
 
 > An authoritative real-time 1v1 multiplayer web adaptation of the classic abstract strategy board game **Quoridor**, engineered with a zero-dependency domain core, real-time Breadth-First Search (BFS) pathfinding, NestJS WebSockets, and 100% procedural PixiJS v8 graphics.
 
+**English** | [Español 🇪🇸](README.es.md)
+
 [![Tests](https://img.shields.io/badge/tests-26%20passed-brightgreen.svg)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)]()
 [![PixiJS](https://img.shields.io/badge/PixiJS-v8.6-e91e63.svg)]()
@@ -19,65 +21,65 @@ Quoridor is an asymmetric game of spatial obstruction and path race. This implem
 - **Real-Time Graph Pathfinding (BFS Invariant)**: Instant evaluation of the **Golden Rule** (no wall placement may completely trap either player) running in $< 0.05\text{ ms}$ over the 81-node grid, delivering 60 FPS responsive hover feedback.
 - **100% Procedural Graphics (`apps/web`)**: Built with PixiJS v8 using vector drawing primitives (`PIXI.Graphics`). No external PNG/JPG textures, sprite sheets, or asset downloads are used—yielding zero asset latency and crisp resolution across all displays.
 - **Matchmaking & Reconnection Grace**: Built-in 1v1 matchmaking queue, room sharing via URL parameters (`?room=XYZ`), and 30-second reconnection grace period before declaring forfeit.
-- **Internationalization (i18n)**: Fully bilingual interface (Español & English) with automatic browser locale detection, manual toggle, and interactive welcome tutorial.
+- **Internationalization (i18n)**: Fully bilingual interface (English & Español) with automatic browser locale detection, manual toggle, and interactive welcome tutorial.
 - **Production Containerization**: Fully reproducible `Dockerfile`s and `docker-compose.yml` orchestrating client and server with a single command.
 
 ---
 
-## 2. Guía del Juego: ¿Cómo Jugar a Quoridor? (How to Play)
+## 2. Game Guide: How to Play Quoridor
 
-Quoridor es un duelo táctico por turnos donde cada jugador busca alcanzar el lado opuesto del tablero antes que su rival, usando muros para obstaculizar el avance enemigo sin quedar atrapado en su propia trampa.
+Quoridor is a turn-based tactical duel where each player aims to reach the opposite side of the board before their rival, using walls to obstruct the opponent's path without getting trapped in their own maze.
 
 ```
-       [META DE JUGADOR 2 / ROW 0]
+       [PLAYER 2 GOAL / ROW 0]
        +---+---+---+---+---+---+---+---+---+
-       |   |   |   |   | P1|   |   |   |   |  <- P1 empieza en (0, 4)
+       |   |   |   |   | P1|   |   |   |   |  <- P1 starts at (0, 4)
        +---+---+---+---+---+---+---+---+---+
        |   |   |   |   |   |   |   |   |   |
-       +===+===+---+---+---+---+---+---+---+  <- Muro Horizontal (2 casillas)
+       +===+===+---+---+---+---+---+---+---+  <- Horizontal Wall (2 cells)
        |   |   |   |   |   |   |   |   |   |
        +---+---+---+---+---+---+---+---+---+
-       |   |   |   |   |   | | |   |   |   |  <- Muro Vertical
+       |   |   |   |   |   | | |   |   |   |  <- Vertical Wall
        +---+---+---+---+---+ | +---+---+---+
        |   |   |   |   |   | | |   |   |   |
        +---+---+---+---+---+---+---+---+---+
-       |   |   |   |   | P2|   |   |   |   |  <- P2 empieza en (8, 4)
+       |   |   |   |   | P2|   |   |   |   |  <- P2 starts at (8, 4)
        +---+---+---+---+---+---+---+---+---+
-       [META DE JUGADOR 1 / ROW 8]
+       [PLAYER 1 GOAL / ROW 8]
 ```
 
-### 2.1 Reglas Fundamentales (Step-by-Step)
+### 2.1 Fundamental Rules (Step-by-Step)
 
-1. **Objetivo de la Victoria**:
-   - **Jugador 1 (Cian Eléctrico)**: Empieza en la casilla central superior `(0, 4)`. Gana al alcanzar cualquier casilla de la fila inferior (`Fila 8`).
-   - **Jugador 2 (Radiant Coral)**: Empieza en la casilla central inferior `(8, 4)`. Gana al alcanzar cualquier casilla de la fila superior (`Fila 0`).
+1. **Victory Objective**:
+   - **Player 1 (Electric Cyan)**: Starts at the top center square `(0, 4)`. Wins by reaching any square on the bottom edge (`Row 8`).
+   - **Player 2 (Radiant Coral)**: Starts at the bottom center square `(8, 4)`. Wins by reaching any square on the top edge (`Row 0`).
 
-2. **Acciones por Turno (Elige UNA)**:
-   - **Opción A: Mover tu Peón**:
-     - Haz clic en cualquiera de los discos luminosos cian o coral que aparecen alrededor de tu ficha.
-     - Puedes moverte 1 casilla ortogonal (arriba, abajo, izquierda, derecha) si no hay un muro que te bloquee el paso.
-     - **Salto Recto**: Si tu oponente está en una casilla adyacente y no hay un muro detrás de él, puedes saltar directamente por encima de él.
-     - **Salto Diagonal**: Si el salto recto está bloqueado por una pared o el límite del tablero, puedes saltar diagonalmente a cualquiera de los dos lados abiertos del rival.
-   - **Opción B: Colocar un Muro**:
-     - Cada jugador cuenta con **10 muros** por partida.
-     - Pasa el cursor por las **ranuras o puntos guía entre casillas** para ver el muro fantasma.
-     - Pulsa <kbd>Espacio</kbd> o <kbd>R</kbd> (o el botón "Girar Muro") para alternar entre orientación **Horizontal** o **Vertical**.
-     - Haz clic para colocarlo. El muro bloqueará el paso para ambos jugadores por igual.
+2. **Actions per Turn (Choose ONE)**:
+   - **Option A: Move Your Pawn**:
+     - Click on any illuminated highlight disc (cyan or coral) appearing on legal adjacent squares.
+     - Move 1 square orthogonally (up, down, left, right) unless obstructed by a wall.
+     - **Straight Jump**: If your opponent is on an adjacent square and there is no wall behind them, you can jump straight over them.
+     - **Diagonal Jump**: If the straight jump is blocked by a wall or the board edge, you may jump diagonally to either open side of the opponent.
+   - **Option B: Place a Wall**:
+     - Each player starts with **10 walls** per match.
+     - Hover your cursor over the **grooves or intersection pins** between cells to preview the ghost wall.
+     - Press <kbd>Space</kbd> or <kbd>R</kbd> (or the "Rotate Wall" button) to toggle between **Horizontal** and **Vertical** orientation.
+     - Click to place the wall. Walls obstruct both players equally.
 
-3. **La Regla de Oro (The Golden Rule)**:
-   - **¡Está estrictamente prohibido encerrar por completo a un jugador!**
-   - Siempre debe existir al menos un camino libre hacia la línea de meta para ambos contrincantes.
-   - Si intentas colocar un muro que corte el último camino disponible, el motor calculará la violación mediante **BFS** en tiempo real, mostrará el muro en **rojo translúcido** y rechazará la jugada.
+3. **The Golden Rule**:
+   - **It is strictly forbidden to completely trap a player!**
+   - At all times, there must exist at least one valid path to the goal row for both players.
+   - If an attempted wall placement would cut off the opponent's or your own last remaining path, the game engine detects the violation via **BFS** in real time, displays the wall in **translucent red**, and rejects the placement.
 
-### 2.2 Controles Rápidos y Atajos de Teclado
+### 2.2 Controls & Keyboard Shortcuts
 
-| Control / Atajo | Acción |
+| Control / Shortcut | Action |
 | :--- | :--- |
-| **Puntero del Ratón** | Pasa sobre las casillas para moverte o sobre las ranuras para previsualizar muros |
-| <kbd>Espacio</kbd> o <kbd>R</kbd> | Alternar orientación del muro (**Horizontal** $\leftrightarrow$ **Vertical**) |
-| **Clic Izquierdo** | Confirmar movimiento de ficha o colocación de muro |
-| **Botón ❓ ¿Cómo Jugar?** | Reabrir el diálogo explicativo interactivo en cualquier momento |
-| **Selector [ ES \| EN ]** | Cambiar idioma al instante entre Español e Inglés |
+| **Mouse Hover** | Hover over tiles to view legal pawn moves, or over grooves to preview walls |
+| <kbd>Space</kbd> or <kbd>R</kbd> | Toggle wall orientation (**Horizontal** $\leftrightarrow$ **Vertical**) |
+| **Left Click** | Confirm pawn move or wall placement |
+| **❓ How to Play Button** | Reopen the interactive onboarding tutorial modal at any time |
+| **[ ES \| EN ] Selector** | Instantly switch interface language between Spanish and English |
 
 ---
 
