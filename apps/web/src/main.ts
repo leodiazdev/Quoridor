@@ -133,6 +133,14 @@ class QuoridorApp {
       this.socketClient.joinRoom(code);
     });
 
+    const quickMatchBtn = document.getElementById('quickMatchBtn')!;
+    quickMatchBtn.addEventListener('click', () => {
+      this.isMultiplayer = true;
+      this.hud.updateConnection('connecting');
+      this.socketClient.joinRoom(undefined); // Join open room or create new waiting room
+      this.hud.showToast('Searching for an opponent...');
+    });
+
     roomInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         joinBtn.click();
