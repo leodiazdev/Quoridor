@@ -6,6 +6,7 @@ export class BoardRenderer {
   public container = new Container();
   private backgroundGfx = new Graphics();
   private tilesGfx = new Graphics();
+  private groovesGfx = new Graphics();
   private indicatorsContainer = new Container();
 
   public onMoveSelected?: (pos: Position) => void;
@@ -13,6 +14,7 @@ export class BoardRenderer {
   constructor() {
     this.container.addChild(this.backgroundGfx);
     this.container.addChild(this.tilesGfx);
+    this.container.addChild(this.groovesGfx);
     this.container.addChild(this.indicatorsContainer);
 
     this.drawBoard();
@@ -47,6 +49,27 @@ export class BoardRenderer {
         this.tilesGfx
           .roundRect(x, y, RENDER_CONFIG.TILE_SIZE, RENDER_CONFIG.TILE_SIZE, RENDER_CONFIG.TILE_CORNER_RADIUS)
           .fill({ color: RENDER_CONFIG.COLORS.TILE_NORMAL });
+      }
+    }
+
+    // 3. 64 Groove Intersection Pins
+    this.groovesGfx.clear();
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const cx =
+          RENDER_CONFIG.BOARD_PADDING +
+          (c + 1) * RENDER_CONFIG.TILE_SIZE +
+          c * RENDER_CONFIG.GAP_SIZE +
+          RENDER_CONFIG.GAP_SIZE / 2;
+        const cy =
+          RENDER_CONFIG.BOARD_PADDING +
+          (r + 1) * RENDER_CONFIG.TILE_SIZE +
+          r * RENDER_CONFIG.GAP_SIZE +
+          RENDER_CONFIG.GAP_SIZE / 2;
+
+        this.groovesGfx
+          .circle(cx, cy, 3)
+          .fill({ color: 0x334155, alpha: 0.85 });
       }
     }
   }

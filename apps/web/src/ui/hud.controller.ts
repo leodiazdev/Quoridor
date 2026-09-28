@@ -8,6 +8,8 @@ export class HudController {
   private p2WallsText = document.getElementById('p2WallsText')!;
   private p1DistanceText = document.getElementById('p1DistanceText')!;
   private p2DistanceText = document.getElementById('p2DistanceText')!;
+  private p1PipsContainer = document.getElementById('p1PipsContainer')!;
+  private p2PipsContainer = document.getElementById('p2PipsContainer')!;
   private p1RoleTag = document.getElementById('p1RoleTag')!;
   private p2RoleTag = document.getElementById('p2RoleTag')!;
 
@@ -60,9 +62,11 @@ export class HudController {
       this.p2Card.className = 'p-3.5 rounded-lg border border-slate-800 bg-slate-800/20 transition-all flex items-center justify-between';
     }
 
-    // 3. Walls Counter
+    // 3. Walls Counter & Visual Pips
     this.p1WallsText.textContent = state.players.player1.wallsLeft.toString();
     this.p2WallsText.textContent = state.players.player2.wallsLeft.toString();
+    this.renderWallPips(this.p1PipsContainer, state.players.player1.wallsLeft);
+    this.renderWallPips(this.p2PipsContainer, state.players.player2.wallsLeft);
 
     // 4. Shortest Distance to Goal via Pathfinding BFS
     const p1Path = PathfindingService.findShortestPath(state.players.player1.position, 8, state.walls);
@@ -101,6 +105,19 @@ export class HudController {
       this.showGameOverModal(state.winner, myRole);
     } else {
       this.hideGameOverModal();
+    }
+  }
+
+  private renderWallPips(container: HTMLElement, remainingWalls: number) {
+    if (!container) return;
+    container.innerHTML = '';
+    for (let i = 0; i < 10; i++) {
+      const pip = document.createElement('div');
+      const isAvailable = i < remainingWalls;
+      pip.className = `h-2 flex-1 rounded-sm transition-all duration-300 ${
+        isAvailable ? 'bg-amber-400 shadow-sm shadow-amber-400/40' : 'bg-slate-800 border border-slate-700/50 opacity-40'
+      }`;
+      container.appendChild(pip);
     }
   }
 

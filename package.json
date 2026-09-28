@@ -9,9 +9,10 @@
     "typecheck": "pnpm -r run typecheck",
     "dev:server": "pnpm --filter @quoridor/server run start:dev",
     "dev:web": "pnpm --filter @quoridor/web run dev",
-    "dev": "pnpm --filter @quoridor/server run start:dev & pnpm --filter @quoridor/web run dev"
+    "dev": "concurrently -n server,web -c magenta,cyan \"pnpm run dev:server\" \"pnpm run dev:web\""
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "typescript": "^5.7.3"
   }
 }

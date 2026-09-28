@@ -82,48 +82,60 @@
           <!-- Scoreboard: Player 1 vs Player 2 -->
           <div class="flex flex-col gap-3">
             <!-- Player 1 Card -->
-            <div id="p1Card" class="p-3.5 rounded-lg border-2 border-cyan-500/60 bg-cyan-950/20 transition-all flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-7 h-7 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50 flex items-center justify-center font-bold text-slate-950 text-xs">
-                  1
-                </div>
-                <div>
-                  <div class="font-bold text-sm text-cyan-300 flex items-center gap-1.5">
-                    Player 1
-                    <span id="p1RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-900/50 text-cyan-300">You</span>
+            <div id="p1Card" class="p-3.5 rounded-lg border-2 border-cyan-500/60 bg-cyan-950/20 transition-all flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-7 h-7 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/50 flex items-center justify-center font-bold text-slate-950 text-xs">
+                    1
                   </div>
-                  <div class="text-[11px] text-slate-400">Target: Row 8 (Bottom)</div>
+                  <div>
+                    <div class="font-bold text-sm text-cyan-300 flex items-center gap-1.5">
+                      Player 1
+                      <span id="p1RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-900/50 text-cyan-300">You</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400">Target: Row 8 (Bottom)</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-bold text-amber-400 flex items-center justify-end gap-1">
+                    <span id="p1WallsText" class="text-base font-extrabold">10</span>
+                    <span class="text-[10px] text-slate-400 uppercase">muros</span>
+                  </div>
+                  <div id="p1DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 steps</div>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="text-xs font-bold text-amber-400 flex items-center justify-end gap-1">
-                  <span id="p1WallsText" class="text-base font-extrabold">10</span>
-                  <span class="text-[10px] text-slate-400 uppercase">walls</span>
-                </div>
-                <div id="p1DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 steps</div>
+              <!-- Wall Pips -->
+              <div id="p1PipsContainer" class="flex items-center gap-1 pt-1 border-t border-slate-800/80">
+                <!-- 10 pips rendered via JS -->
               </div>
             </div>
 
             <!-- Player 2 Card -->
-            <div id="p2Card" class="p-3.5 rounded-lg border border-slate-800 bg-slate-800/20 transition-all flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-7 h-7 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50 flex items-center justify-center font-bold text-white text-xs">
-                  2
-                </div>
-                <div>
-                  <div class="font-bold text-sm text-rose-300 flex items-center gap-1.5">
-                    Player 2
-                    <span id="p2RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-rose-950/50 text-rose-300 hidden">Opponent</span>
+            <div id="p2Card" class="p-3.5 rounded-lg border border-slate-800 bg-slate-800/20 transition-all flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-7 h-7 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50 flex items-center justify-center font-bold text-white text-xs">
+                    2
                   </div>
-                  <div class="text-[11px] text-slate-400">Target: Row 0 (Top)</div>
+                  <div>
+                    <div class="font-bold text-sm text-rose-300 flex items-center gap-1.5">
+                      Player 2
+                      <span id="p2RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-rose-950/50 text-rose-300 hidden">Opponent</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400">Target: Row 0 (Top)</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs font-bold text-amber-400 flex items-center justify-end gap-1">
+                    <span id="p2WallsText" class="text-base font-extrabold">10</span>
+                    <span class="text-[10px] text-slate-400 uppercase">muros</span>
+                  </div>
+                  <div id="p2DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 steps</div>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="text-xs font-bold text-amber-400 flex items-center justify-end gap-1">
-                  <span id="p2WallsText" class="text-base font-extrabold">10</span>
-                  <span class="text-[10px] text-slate-400 uppercase">walls</span>
-                </div>
-                <div id="p2DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 steps</div>
+              <!-- Wall Pips -->
+              <div id="p2PipsContainer" class="flex items-center gap-1 pt-1 border-t border-slate-800/80">
+                <!-- 10 pips rendered via JS -->
               </div>
             </div>
           </div>
@@ -132,15 +144,20 @@
         <!-- Action / Wall Mode Bar -->
         <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-4 backdrop-blur flex flex-col gap-3">
           <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-            <span>Wall Deployment</span>
+            <span>Wall Deployment / Muros</span>
             <span id="orientationBadge" class="text-xs font-mono text-amber-400 font-bold">HORIZONTAL</span>
+          </div>
+
+          <!-- Quick Wall Helper Notice -->
+          <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-200/90 leading-relaxed flex items-start gap-2">
+            <span class="text-amber-400 text-sm">💡</span>
+            <span>Pasa el cursor sobre los <strong>puntos entre casillas</strong> para ver el muro fantasma. Pulsa <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-white">Espacio</kbd> o <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-white">R</kbd> para girarlo y haz <strong>clic</strong> para colocarlo.</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <button id="rotateWallBtn" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition">
               <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-              Rotate Wall
-            </button>
+              Rotate (Girar)
             <button id="resetGameBtn" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition">
               <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
               Restart
