@@ -11,29 +11,43 @@
   </head>
   <body class="bg-[#0b1120] text-slate-100 font-['Outfit'] min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-black overflow-x-hidden">
     <!-- Top Bar Navigation / Room Status -->
-    <header class="w-full border-b border-slate-800 bg-slate-900/60 backdrop-blur-md px-6 py-3 flex items-center justify-between sticky top-0 z-40">
+    <header class="w-full border-b border-slate-800 bg-slate-900/60 backdrop-blur-md px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-40">
       <div class="flex items-center space-x-3">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-slate-950 text-base shadow-lg shadow-cyan-500/20">
           Q
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-            QUORIDOR
-            <span class="text-[10px] font-mono uppercase bg-slate-800 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-500/30">Authoritative</span>
+            <span id="headerTitle">QUORIDOR</span>
+            <span id="headerBadge" class="text-[10px] font-mono uppercase bg-slate-800 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-500/30">Authoritative</span>
           </h1>
         </div>
       </div>
 
-      <div class="flex items-center space-x-4 text-xs font-mono">
-        <div id="connectionStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="connectionText">Online (Local)</span>
+      <div class="flex items-center space-x-2 sm:space-x-3 text-xs font-mono">
+        <!-- How to Play Button -->
+        <button id="howToPlayBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-slate-700 transition shadow-sm font-semibold">
+          <span>❓</span>
+          <span id="howToPlayText">¿Cómo Jugar?</span>
+        </button>
+
+        <!-- Language Switcher (ES / EN) -->
+        <div class="flex items-center rounded-full bg-slate-800/90 p-0.5 border border-slate-700 font-bold">
+          <button id="langEsBtn" class="px-2.5 py-1 rounded-full text-cyan-400 bg-slate-700/90 shadow-sm transition">ES</button>
+          <button id="langEnBtn" class="px-2.5 py-1 rounded-full text-slate-400 hover:text-white transition">EN</button>
         </div>
 
+        <!-- Connection Status Indicator -->
+        <div id="connectionStatus" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="connectionText">Online</span>
+        </div>
+
+        <!-- Room Code & Link Copy -->
         <div id="roomBadge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300">
-          <span class="text-slate-400">ROOM:</span>
+          <span id="roomLabel" class="text-slate-400">SALA:</span>
           <span id="roomCodeText" class="font-bold text-cyan-400">LOCAL</span>
-          <button id="copyRoomBtn" title="Copy room link" class="hover:text-white transition-colors">
+          <button id="copyRoomBtn" title="Copiar enlace de sala" class="hover:text-white transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
           </button>
         </div>
@@ -41,28 +55,28 @@
     </header>
 
     <!-- Main Game Area -->
-    <main class="flex-1 flex flex-col lg:flex-row items-center justify-center p-4 lg:p-8 gap-8 max-w-7xl mx-auto w-full">
+    <main class="flex-1 flex flex-col lg:flex-row items-center justify-center p-3 sm:p-6 lg:p-8 gap-6 max-w-7xl mx-auto w-full">
       <!-- PixiJS Canvas Container -->
       <section class="flex flex-col items-center justify-center relative">
-        <div id="canvasContainer" class="rounded-2xl p-2 bg-slate-900/80 border border-slate-800/80 shadow-2xl shadow-cyan-950/20 backdrop-blur relative overflow-hidden flex items-center justify-center">
+        <div id="canvasContainer" class="rounded-2xl p-2 bg-slate-900/80 border border-slate-800/80 shadow-2xl shadow-cyan-950/20 backdrop-blur relative overflow-hidden flex items-center justify-center touch-none">
           <!-- Canvas injected here -->
         </div>
 
         <!-- Controls Guide Footer -->
-        <div class="flex items-center justify-center gap-6 mt-4 text-xs font-mono text-slate-400">
+        <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-4 text-xs font-mono text-slate-400">
           <div class="flex items-center gap-1.5">
             <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">Space</kbd>
             <span>/</span>
             <kbd class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">R</kbd>
-            <span>Rotate Wall</span>
+            <span id="controlsSpaceText">Girar Muro</span>
           </div>
           <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-            <span>Click Disc to Move</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400"></span>
+            <span id="controlsDiscText">Clic en disco para mover</span>
           </div>
           <div class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span>Click Groove to Place Wall</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400"></span>
+            <span id="controlsGrooveText">Clic en ranura para muro</span>
           </div>
         </div>
       </section>
@@ -70,12 +84,12 @@
       <!-- Sidebar HUD & Match Panel -->
       <aside class="w-full lg:w-80 flex flex-col gap-4">
         <!-- Turn Indicator Header -->
-        <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-5 backdrop-blur flex flex-col gap-4 shadow-lg">
+        <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-4 sm:p-5 backdrop-blur flex flex-col gap-3.5 shadow-lg">
           <div class="flex items-center justify-between">
-            <span class="text-xs uppercase tracking-wider font-semibold text-slate-400">Match Status</span>
+            <span id="matchStatusLabel" class="text-xs uppercase tracking-wider font-semibold text-slate-400">Estado de la Partida</span>
             <div id="turnBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-              PLAYER 1 TURN
+              TURNO JUGADOR 1
             </div>
           </div>
 
@@ -90,18 +104,18 @@
                   </div>
                   <div>
                     <div class="font-bold text-sm text-cyan-300 flex items-center gap-1.5">
-                      Player 1
-                      <span id="p1RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-900/50 text-cyan-300">You</span>
+                      <span id="p1NameText">Jugador 1</span>
+                      <span id="p1RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-cyan-900/50 text-cyan-300">Tú</span>
                     </div>
-                    <div class="text-[11px] text-slate-400">Target: Row 8 (Bottom)</div>
+                    <div id="p1TargetText" class="text-[11px] text-slate-400">Meta: Fila 8 (Abajo)</div>
                   </div>
                 </div>
                 <div class="text-right">
                   <div class="text-xs font-bold text-amber-400 flex items-center justify-end gap-1">
                     <span id="p1WallsText" class="text-base font-extrabold">10</span>
-                    <span class="text-[10px] text-slate-400 uppercase">muros</span>
+                    <span id="p1WallsLabel" class="text-[10px] text-slate-400 uppercase">muros</span>
                   </div>
-                  <div id="p1DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 steps</div>
+                  <div id="p1DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 pasos</div>
                 </div>
               </div>
               <!-- Wall Pips -->
@@ -119,18 +133,18 @@
                   </div>
                   <div>
                     <div class="font-bold text-sm text-rose-300 flex items-center gap-1.5">
-                      Player 2
-                      <span id="p2RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-rose-950/50 text-rose-300 hidden">Opponent</span>
+                      <span id="p2NameText">Jugador 2</span>
+                      <span id="p2RoleTag" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-rose-950/50 text-rose-300 hidden">Rival</span>
                     </div>
-                    <div class="text-[11px] text-slate-400">Target: Row 0 (Top)</div>
+                    <div id="p2TargetText" class="text-[11px] text-slate-400">Meta: Fila 0 (Arriba)</div>
                   </div>
                 </div>
                 <div class="text-right">
                   <div class="text-xs font-bold text-amber-400 flex items-center justify-end gap-1">
                     <span id="p2WallsText" class="text-base font-extrabold">10</span>
-                    <span class="text-[10px] text-slate-400 uppercase">muros</span>
+                    <span id="p2WallsLabel" class="text-[10px] text-slate-400 uppercase">muros</span>
                   </div>
-                  <div id="p2DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 steps</div>
+                  <div id="p2DistanceText" class="text-[10px] font-mono text-slate-400">Dist: 8 pasos</div>
                 </div>
               </div>
               <!-- Wall Pips -->
@@ -144,46 +158,134 @@
         <!-- Action / Wall Mode Bar -->
         <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-4 backdrop-blur flex flex-col gap-3">
           <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-            <span>Wall Deployment / Muros</span>
+            <span id="wallDeploymentTitle">Despliegue de Muros</span>
             <span id="orientationBadge" class="text-xs font-mono text-amber-400 font-bold">HORIZONTAL</span>
           </div>
 
+          <!-- Mode Switcher Tabs (Move Pawn vs Place Wall) -->
+          <div class="grid grid-cols-2 gap-1.5 p-1 rounded-lg bg-slate-950/60 border border-slate-800">
+            <button id="modeMoveBtn" class="py-1.5 px-2 rounded text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition">
+              ♟ <span id="modeMoveText">Mover Ficha</span>
+            </button>
+            <button id="modeWallBtn" class="py-1.5 px-2 rounded text-xs font-semibold text-slate-400 hover:text-white border border-transparent transition">
+              🧱 <span id="modeWallText">Colocar Muro</span>
+            </button>
+          </div>
+
           <!-- Quick Wall Helper Notice -->
-          <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-200/90 leading-relaxed flex items-start gap-2">
+          <div id="wallHintBox" class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-200/90 leading-relaxed flex items-start gap-2">
             <span class="text-amber-400 text-sm">💡</span>
-            <span>Pasa el cursor sobre los <strong>puntos entre casillas</strong> para ver el muro fantasma. Pulsa <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-white">Espacio</kbd> o <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-white">R</kbd> para girarlo y haz <strong>clic</strong> para colocarlo.</span>
+            <span id="wallHintText">Pasa el cursor sobre los <strong>puntos entre casillas</strong> para ver el muro fantasma. Pulsa <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-white">Espacio</kbd> o <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-white">R</kbd> para girarlo y haz <strong>clic</strong> para colocarlo.</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <button id="rotateWallBtn" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition">
               <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-              Rotate (Girar)
+              <span id="rotateWallText">Girar Muro</span>
+            </button>
             <button id="resetGameBtn" class="px-3 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition">
               <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-              Restart
+              <span id="resetGameText">Reiniciar</span>
             </button>
           </div>
         </div>
 
         <!-- Matchmaking / Room Connection Panel -->
         <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-4 backdrop-blur flex flex-col gap-3">
-          <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Multiplayer Connection</span>
+          <span id="multiplayerTitle" class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Multijugador en Tiempo Real</span>
           <div class="flex gap-2">
-            <input id="roomInput" type="text" placeholder="Enter Room Code" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 uppercase" />
+            <input id="roomInput" type="text" placeholder="CÓDIGO DE SALA" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 uppercase" />
             <button id="joinRoomBtn" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-lg text-xs transition shadow-md shadow-cyan-500/20">
-              Join / Create
+              <span id="joinCreateText">Unirse / Crear</span>
             </button>
           </div>
           <button id="quickMatchBtn" class="w-full py-2 bg-slate-800/90 hover:bg-slate-700/90 text-cyan-300 font-semibold rounded-lg text-xs border border-slate-700/80 transition flex items-center justify-center gap-2">
             <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            Auto Matchmaking (Find Opponent)
+            <span id="autoMatchText">Emparejamiento Automático (1v1)</span>
           </button>
           <button id="playOfflineBtn" class="text-[11px] text-slate-400 hover:text-cyan-400 underline underline-offset-4 text-center transition">
-            Switch to Pass & Play (Offline)
+            <span id="switchToOfflineText">Cambiar a modo local (Pasa y Juega)</span>
           </button>
         </div>
       </aside>
     </main>
+
+    <!-- Welcome & How to Play Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center z-50 p-4 overflow-y-auto">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 sm:p-8 flex flex-col shadow-2xl relative my-auto animate-in fade-in zoom-in-95 duration-200">
+        <!-- Close Button -->
+        <button id="tutorialCloseBtn" class="absolute top-5 right-5 text-slate-400 hover:text-white transition p-1.5 rounded-lg hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-xl shadow-lg shadow-cyan-500/20">
+            🎮
+          </div>
+          <div>
+            <h2 id="tutorialTitle" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">¿Cómo Jugar a Quoridor?</h2>
+            <p id="tutorialSubtitle" class="text-xs text-slate-400">Juego de estrategia abstracta en tiempo real para 2 jugadores.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-5">
+          <!-- Step 1 -->
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 flex flex-col gap-1.5">
+            <div class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+              <span>🎯</span>
+              <span id="tutorialStep1Title">1. Objetivo del Juego</span>
+            </div>
+            <p id="tutorialStep1Desc" class="text-[11px] text-slate-300 leading-relaxed">
+              Sé el primero en llevar tu peón al lado opuesto del tablero (cualquiera de las casillas de la fila inicial del oponente).
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 flex flex-col gap-1.5">
+            <div class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <span>♟</span>
+              <span id="tutorialStep2Title">2. Mover tu Ficha</span>
+            </div>
+            <p id="tutorialStep2Desc" class="text-[11px] text-slate-300 leading-relaxed">
+              En tu turno puedes mover 1 casilla ortogonalmente hacia cualquiera de los discos brillantes. Si tu rival está cara a cara, ¡puedes saltar por encima de él!
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 flex flex-col gap-1.5">
+            <div class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <span>🧱</span>
+              <span id="tutorialStep3Title">3. Colocar Muros de Bloqueo</span>
+            </div>
+            <p id="tutorialStep3Desc" class="text-[11px] text-slate-300 leading-relaxed">
+              Dispones de 10 muros de 2 casillas. Pasa el cursor sobre los <strong>puntos entre casillas</strong> para ver el muro fantasma. Pulsa <kbd class="px-1 rounded bg-slate-900 border border-slate-700 text-amber-300">Espacio</kbd> o <kbd class="px-1 rounded bg-slate-900 border border-slate-700 text-amber-300">R</kbd> para girarlo y haz clic para colocarlo.
+            </p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 flex flex-col gap-1.5">
+            <div class="text-xs font-bold text-rose-400 flex items-center gap-1.5">
+              <span>🛡️</span>
+              <span id="tutorialStep4Title">4. La Regla de Oro (BFS)</span>
+            </div>
+            <p id="tutorialStep4Desc" class="text-[11px] text-slate-300 leading-relaxed">
+              ¡Está prohibido encerrar por completo a un jugador! Siempre debe existir al menos un camino libre a la meta. Si un muro bloquea el último camino, se pondrá en rojo y será rechazado.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800">
+          <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-400 select-none hover:text-slate-300">
+            <input id="tutorialDontShowCheckbox" type="checkbox" class="rounded bg-slate-800 border-slate-700 text-cyan-500 focus:ring-0 w-4 h-4 cursor-pointer" />
+            <span id="tutorialDontShowLabel">No volver a mostrar automáticamente</span>
+          </label>
+
+          <button id="tutorialGotItBtn" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-500/25">
+            ¡Entendido, a jugar!
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Game Over Modal -->
     <div id="gameOverModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
@@ -191,24 +293,24 @@
         <div id="winnerIcon" class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mb-4 shadow-xl">
           🏆
         </div>
-        <h2 id="winnerTitle" class="text-2xl font-extrabold text-white mb-2 tracking-tight">PLAYER 1 VICTORIOUS!</h2>
-        <p id="winnerSubtitle" class="text-xs text-slate-400 mb-6">Successfully reached the opposing baseline through masterful spatial strategy.</p>
+        <h2 id="winnerTitle" class="text-2xl font-extrabold text-white mb-2 tracking-tight">¡VICTORIA!</h2>
+        <p id="winnerSubtitle" class="text-xs text-slate-400 mb-6">Alcanzaste la meta opuesta con éxito.</p>
         
         <div class="w-full flex flex-col gap-2">
           <button id="modalPlayAgainBtn" class="w-full py-3 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-cyan-500/25">
-            Play Again
+            Jugar de Nuevo
           </button>
           <button id="modalCloseBtn" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs transition">
-            Review Board
+            Examinar Tablero
           </button>
         </div>
       </div>
     </div>
 
     <!-- Alert Toast Notification -->
-    <div id="toastNotification" class="fixed bottom-6 right-6 bg-rose-950/90 border border-rose-500/50 text-rose-200 text-xs px-4 py-2.5 rounded-lg shadow-xl backdrop-blur transition-all duration-300 opacity-0 pointer-events-none translate-y-2 z-50 flex items-center gap-2">
-      <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-      <span id="toastMessage">Illegal Action</span>
+    <div id="toastNotification" class="fixed bottom-6 right-6 bg-slate-900/95 border border-cyan-500/50 text-slate-100 text-xs px-4 py-2.5 rounded-lg shadow-xl backdrop-blur transition-all duration-300 opacity-0 pointer-events-none translate-y-2 z-50 flex items-center gap-2">
+      <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span id="toastMessage">Acción</span>
     </div>
 
     <script type="module" src="/src/main.ts"></script>

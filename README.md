@@ -19,11 +19,69 @@ Quoridor is an asymmetric game of spatial obstruction and path race. This implem
 - **Real-Time Graph Pathfinding (BFS Invariant)**: Instant evaluation of the **Golden Rule** (no wall placement may completely trap either player) running in $< 0.05\text{ ms}$ over the 81-node grid, delivering 60 FPS responsive hover feedback.
 - **100% Procedural Graphics (`apps/web`)**: Built with PixiJS v8 using vector drawing primitives (`PIXI.Graphics`). No external PNG/JPG textures, sprite sheets, or asset downloads are used—yielding zero asset latency and crisp resolution across all displays.
 - **Matchmaking & Reconnection Grace**: Built-in 1v1 matchmaking queue, room sharing via URL parameters (`?room=XYZ`), and 30-second reconnection grace period before declaring forfeit.
+- **Internationalization (i18n)**: Fully bilingual interface (Español & English) with automatic browser locale detection, manual toggle, and interactive welcome tutorial.
 - **Production Containerization**: Fully reproducible `Dockerfile`s and `docker-compose.yml` orchestrating client and server with a single command.
 
 ---
 
-## 2. Domain Invariants & Rules
+## 2. Guía del Juego: ¿Cómo Jugar a Quoridor? (How to Play)
+
+Quoridor es un duelo táctico por turnos donde cada jugador busca alcanzar el lado opuesto del tablero antes que su rival, usando muros para obstaculizar el avance enemigo sin quedar atrapado en su propia trampa.
+
+```
+       [META DE JUGADOR 2 / ROW 0]
+       +---+---+---+---+---+---+---+---+---+
+       |   |   |   |   | P1|   |   |   |   |  <- P1 empieza en (0, 4)
+       +---+---+---+---+---+---+---+---+---+
+       |   |   |   |   |   |   |   |   |   |
+       +===+===+---+---+---+---+---+---+---+  <- Muro Horizontal (2 casillas)
+       |   |   |   |   |   |   |   |   |   |
+       +---+---+---+---+---+---+---+---+---+
+       |   |   |   |   |   | | |   |   |   |  <- Muro Vertical
+       +---+---+---+---+---+ | +---+---+---+
+       |   |   |   |   |   | | |   |   |   |
+       +---+---+---+---+---+---+---+---+---+
+       |   |   |   |   | P2|   |   |   |   |  <- P2 empieza en (8, 4)
+       +---+---+---+---+---+---+---+---+---+
+       [META DE JUGADOR 1 / ROW 8]
+```
+
+### 2.1 Reglas Fundamentales (Step-by-Step)
+
+1. **Objetivo de la Victoria**:
+   - **Jugador 1 (Cian Eléctrico)**: Empieza en la casilla central superior `(0, 4)`. Gana al alcanzar cualquier casilla de la fila inferior (`Fila 8`).
+   - **Jugador 2 (Radiant Coral)**: Empieza en la casilla central inferior `(8, 4)`. Gana al alcanzar cualquier casilla de la fila superior (`Fila 0`).
+
+2. **Acciones por Turno (Elige UNA)**:
+   - **Opción A: Mover tu Peón**:
+     - Haz clic en cualquiera de los discos luminosos cian o coral que aparecen alrededor de tu ficha.
+     - Puedes moverte 1 casilla ortogonal (arriba, abajo, izquierda, derecha) si no hay un muro que te bloquee el paso.
+     - **Salto Recto**: Si tu oponente está en una casilla adyacente y no hay un muro detrás de él, puedes saltar directamente por encima de él.
+     - **Salto Diagonal**: Si el salto recto está bloqueado por una pared o el límite del tablero, puedes saltar diagonalmente a cualquiera de los dos lados abiertos del rival.
+   - **Opción B: Colocar un Muro**:
+     - Cada jugador cuenta con **10 muros** por partida.
+     - Pasa el cursor por las **ranuras o puntos guía entre casillas** para ver el muro fantasma.
+     - Pulsa <kbd>Espacio</kbd> o <kbd>R</kbd> (o el botón "Girar Muro") para alternar entre orientación **Horizontal** o **Vertical**.
+     - Haz clic para colocarlo. El muro bloqueará el paso para ambos jugadores por igual.
+
+3. **La Regla de Oro (The Golden Rule)**:
+   - **¡Está estrictamente prohibido encerrar por completo a un jugador!**
+   - Siempre debe existir al menos un camino libre hacia la línea de meta para ambos contrincantes.
+   - Si intentas colocar un muro que corte el último camino disponible, el motor calculará la violación mediante **BFS** en tiempo real, mostrará el muro en **rojo translúcido** y rechazará la jugada.
+
+### 2.2 Controles Rápidos y Atajos de Teclado
+
+| Control / Atajo | Acción |
+| :--- | :--- |
+| **Puntero del Ratón** | Pasa sobre las casillas para moverte o sobre las ranuras para previsualizar muros |
+| <kbd>Espacio</kbd> o <kbd>R</kbd> | Alternar orientación del muro (**Horizontal** $\leftrightarrow$ **Vertical**) |
+| **Clic Izquierdo** | Confirmar movimiento de ficha o colocación de muro |
+| **Botón ❓ ¿Cómo Jugar?** | Reabrir el diálogo explicativo interactivo en cualquier momento |
+| **Selector [ ES \| EN ]** | Cambiar idioma al instante entre Español e Inglés |
+
+---
+
+## 3. Domain Invariants & Rules
 
 ### Mathematical Definitions of Board & Wall Geometry
 
@@ -84,9 +142,9 @@ Because edge weights are uniform (each step costs 1 turn), BFS is guaranteed to 
 
 ---
 
-## 3. Architecture Diagrams
+## 4. Architecture Diagrams
 
-### 3.1 Hexagonal Architecture (Decoupled Core)
+### 4.1 Hexagonal Architecture (Decoupled Core)
 
 ```mermaid
 graph TD
@@ -118,7 +176,7 @@ graph TD
 
 ---
 
-### 3.2 Turn Lifecycle Sequence Diagram
+### 4.2 Turn Lifecycle Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -151,7 +209,7 @@ sequenceDiagram
 
 ---
 
-### 3.3 State Machine Diagram
+### 4.3 State Machine Diagram
 
 ```mermaid
 stateDiagram-v2
@@ -186,13 +244,13 @@ stateDiagram-v2
 
 ---
 
-## 4. How to Run Locally
+## 5. How to Run Locally
 
 ### Prerequisites
 - Node.js $\ge 20$
 - pnpm $\ge 10$ (or corepack / npm)
 
-### 4.1 Local Development (Hot Reload)
+### 5.1 Local Development (Hot Reload)
 
 ```bash
 # 1. Install dependencies across all monorepo packages
@@ -216,7 +274,7 @@ Open `http://localhost:5173` in two browser windows or tabs to play 1v1 real-tim
 
 ---
 
-### 4.2 Test Suite Execution
+### 5.2 Test Suite Execution
 
 Run the complete test suite across domain core, movement rules, BFS pathfinding, and end-to-end WebSocket integration:
 
@@ -234,7 +292,7 @@ pnpm run typecheck
 
 ---
 
-### 4.3 Containerized Execution (Docker Compose)
+### 5.3 Containerized Execution (Docker Compose)
 
 Launch the complete multi-tier architecture with a single command:
 
@@ -247,7 +305,7 @@ docker-compose up --build
 
 ---
 
-## 5. Visual Palette Theme
+## 6. Visual Palette Theme
 
 | Element | Color Code | Visual Role |
 | :--- | :--- | :--- |

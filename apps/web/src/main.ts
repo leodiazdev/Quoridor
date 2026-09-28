@@ -2,11 +2,14 @@ import './index.css';
 import { QuoridorGame, Position, WallOrientation, GameState, PlayerId } from '@quoridor/core';
 import { QuoridorView } from './render/quoridor.view.js';
 import { HudController } from './ui/hud.controller.js';
+import { TutorialModal } from './ui/tutorial.modal.js';
 import { SocketClient } from './network/socket.client.js';
+import { i18n } from './i18n/translations.js';
 
 class QuoridorApp {
   private view = new QuoridorView();
   private hud = new HudController();
+  private tutorialModal!: TutorialModal;
   private localGame = QuoridorGame.create('local');
   private socketClient!: SocketClient;
 
@@ -18,6 +21,7 @@ class QuoridorApp {
     const canvasContainer = document.getElementById('canvasContainer')!;
     await this.view.init(canvasContainer);
 
+    this.tutorialModal = new TutorialModal();
     this.currentGameState = this.localGame.getState();
     this.currentLegalMoves = this.localGame.getLegalMoves();
 
@@ -39,6 +43,9 @@ class QuoridorApp {
       this.hud.updateConnection('local');
       this.refreshView();
     }
+
+    // Check if tutorial should be shown automatically on first visit
+    this.tutorialModal.checkAutoShow();
   }
 
   private setupViewCallbacks() {
@@ -46,7 +53,7 @@ class QuoridorApp {
       if (this.isMultiplayer) {
         const myRole = this.socketClient.getRole();
         if (!myRole || myRole === 'spectator' || myRole !== this.currentGameState.currentTurn) {
-          return { valid: false, reason: 'Not your turn.' };
+          return { valid: false, reason: i18n.t('toastNotYourTurn') };
         }
         // Local simulation with current server state
         const simGame = new QuoridorGame(this.currentGameState);
@@ -67,7 +74,7 @@ class QuoridorApp {
           this.currentLegalMoves = this.localGame.getLegalMoves();
           this.refreshView();
         } catch (err: any) {
-          this.hud.showToast(err.message || 'Illegal Move');
+          this.hud.showToast(err.message || i18n.t('toastIllegalMove'));
         }
       }
     };
@@ -83,7 +90,7 @@ class QuoridorApp {
           this.currentLegalMoves = this.localGame.getLegalMoves();
           this.refreshView();
         } catch (err: any) {
-          this.hud.showToast(err.message || 'Illegal Wall Placement');
+          this.hud.showToast(err.message || i18n.t('toastIllegalWall'));
         }
       }
     };
@@ -92,7 +99,6 @@ class QuoridorApp {
   private setupKeyboardListeners() {
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space' || e.key.toLowerCase() === 'r') {
-        // Prevent page scrolling on space
         if (e.target === document.body || (e.target as HTMLElement).tagName !== 'INPUT') {
           e.preventDefault();
           const newOrientation = this.view.toggleOrientation();
@@ -103,6 +109,21 @@ class QuoridorApp {
   }
 
   private setupUiControls() {
+    // How to Play modal button
+    const howToPlayBtn = document.getElementById('howToPlayBtn')!;
+    howToPlayBtn.addEventListener('click', () => {
+      this.tutorialModal.show();
+    });
+
+    this.hud.onLanguageChange = () => {
+      this.tutorialModal.updateLanguage();
+      this.refreshView();
+    };
+
+    this.hud.onModeChange = (mode) => {
+      this.view.setInteractionMode(mode);
+    };
+
     const rotateBtn = document.getElementById('rotateWallBtn')!;
     rotateBtn.addEventListener('click', () => {
       const newOrientation = this.view.toggleOrientation();
@@ -119,7 +140,7 @@ class QuoridorApp {
         this.currentGameState = this.localGame.getState();
         this.currentLegalMoves = this.localGame.getLegalMoves();
         this.refreshView();
-        this.hud.showToast('Game restarted');
+        this.hud.showToast(i18n.t('toastRestarted'));
       }
     });
 
@@ -137,8 +158,8 @@ class QuoridorApp {
     quickMatchBtn.addEventListener('click', () => {
       this.isMultiplayer = true;
       this.hud.updateConnection('connecting');
-      this.socketClient.joinRoom(undefined); // Join open room or create new waiting room
-      this.hud.showToast('Searching for an opponent...');
+      this.socketClient.joinRoom(undefined);
+      this.hud.showToast(i18n.t('toastSearching'));
     });
 
     roomInput.addEventListener('keydown', (e) => {
@@ -155,7 +176,7 @@ class QuoridorApp {
       this.currentLegalMoves = this.localGame.getLegalMoves();
       this.hud.updateConnection('local');
       this.refreshView();
-      this.hud.showToast('Switched to Pass & Play (Local)');
+      this.hud.showToast(i18n.t('passAndPlay'));
     });
 
     const copyBtn = document.getElementById('copyRoomBtn')!;
@@ -164,7 +185,7 @@ class QuoridorApp {
       if (roomId) {
         const url = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
         navigator.clipboard.writeText(url).then(() => {
-          this.hud.showToast('Room link copied to clipboard!');
+          this.hud.showToast(i18n.t('toastRoomCopied'));
         });
       }
     });
@@ -184,7 +205,7 @@ class QuoridorApp {
   private setupNetworking() {
     this.socketClient = new SocketClient({
       onConnected: () => {
-        // Socket connected
+        // Connected
       },
       onDisconnected: () => {
         if (this.isMultiplayer) {
@@ -196,13 +217,12 @@ class QuoridorApp {
         this.currentGameState = state;
         this.currentLegalMoves = legalMoves;
 
-        // Update URL query parameter
         const newUrl = `${window.location.pathname}?room=${roomId}`;
         window.history.replaceState({ path: newUrl }, '', newUrl);
 
         this.hud.updateConnection('online', roomId);
         this.refreshView();
-        this.hud.showToast(`Joined ${roomId} as ${assignedRole.toUpperCase()}`);
+        this.hud.showToast(i18n.t('toastJoined', { room: roomId, role: assignedRole.toUpperCase() }));
       },
       onStateUpdated: (state, legalMoves) => {
         this.currentGameState = state;
@@ -218,7 +238,7 @@ class QuoridorApp {
         this.refreshView();
       },
       onPlayerDisconnected: (playerId, graceSeconds) => {
-        this.hud.showToast(`${playerId} disconnected! Grace period: ${graceSeconds}s`);
+        this.hud.showToast(i18n.t('toastDisconnected', { player: playerId, seconds: graceSeconds }));
       }
     });
 
